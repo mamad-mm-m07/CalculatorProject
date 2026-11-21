@@ -1,0 +1,147 @@
+package com.example.calculator;
+
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
+
+/** منطق ماشین حساب (مستقل از اندروید). کلیدها: 0-9 . + - * / = C B(پاک‌کردن یک رقم) */
+public class CalculatorEngine {
+    private static final int MAX_DIGITS = 15;
+    private static final String DIV_ZERO = "تقسیم بر صفر ممکن نیست";
+
+    private final DecimalFormat plain =
+            new DecimalFormat("0.##########", DecimalFormatSymbols.getInstance(Locale.US));
+    private final DecimalFormat scientific =
+            new DecimalFormat("0.#########E0", DecimalFormatSymbols.getInstance(Locale.US));
+
+    private String display = "0";
+    private double accumulator = 0;
+    private char pendingOp = 0;
+    private boolean newEntry = true;
+    private boolean error = false;
+
+    public String getDisplay() {
+        return display;
+    }
+
+    public void press(String key) {
+        if (error && !key.equals("C")) {
+            reset();
+        }
+        switch (key) {
+            case "C":
+                reset();
+                break;
+            case "B":
+                backspace();
+                break;
+            case ".":
+                inputDot();
+                break;
+            case "+":
+            case "-":
+            case "*":
+            case "/":
+                inputOperator(key.charAt(0));
+                break;
+            case "=":
+                inputEquals();
+                break;
+            default:
+                if (key.length() == 1 && Character.isDigit(key.charAt(0))) {
+                    inputDigit(key);
+                }
+        }
+    }
+
+    private void reset() {
+        display = "0";
+        accumulator = 0;
+        pendingOp = 0;
+        newEntry = true;
+        error = false;
+    }
+
+    private void inputDigit(String d) {
+        if (newEntry || display.equals("0")) {
+            display = d;
+        } else if (display.replace("-", "").replace(".", "").length() < MAX_DIGITS) {
+            display += d;
+        }
+        newEntry = false;
+    }
+
+    private void inputDot() {
+        if (newEntry) {
+            display = "0.";
+            newEntry = false;
+        } else if (!display.contains(".")) {
+            display += ".";
+        }
+    }
+
+    private void backspace() {
+        if (newEntry) return;
+        if (display.length() > 1) {
+            display = display.substring(0, display.length() - 1);
+        } else {
+            display = "0";
+        }
+    }
+
+    private void inputOperator(char op) {
+        if (pendingOp != 0 && !newEntry) {
+            if (!compute(Double.parseDouble(display))) return;
+        } else if (pendingOp == 0) {
+            accumulator = Double.parseDouble(display);
+        }
+        pendingOp = op;
+        newEntry = true;
+    }
+
+    private void inputEquals() {
+        if (pendingOp == 0) return;
+        if (!compute(Double.parseDouble(display))) return;
+        pendingOp = 0;
+        newEntry = true;
+    }
+
+    /** accumulator = accumulator (pendingOp) rhs ؛ در صورت خطا false برمی‌گرداند */
+    private boolean compute(double rhs) {
+        switch (pendingOp) {
+            case '+': accumulator = accumulator + rhs; break;
+            case '-': accumulator = accumulator - rhs; break;
+            case '*': accumulator = accumulator * rhs; break;
+            case '/':
+                if (rhs == 0) {
+                    setError(DIV_ZERO);
+                    return false;
+                }
+                accumulator = accumulator / rhs;
+                break;
+            default: accumulator = rhs;
+        }
+        display = format(accumulator);
+        return true;
+    }
+
+    private void setError(String message) {
+        display = message;
+        error = true;
+        accumulator = 0;
+        pendingOp = 0;
+        newEntry = true;
+    }
+
+    private String format(double v) {
+        v = v + 0.0; // تبدیل -0.0 به 0.0
+        if (Double.isNaN(v) || Double.isInfinite(v)) {
+            setError("خطا");
+            return display;
+        }
+        if (Math.abs(v) >= 1e15) {
+            return scientific.format(v);
+        }
+        return plain.format(v);
+    }
+}
