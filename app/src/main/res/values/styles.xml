@@ -1,0 +1,32 @@
+<resources>
+    <style name="AppTheme" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:colorAccent">#356AE6</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:statusBarColor">#F5F7FB</item>
+        <item name="android:navigationBarColor">#F5F7FB</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
+
+    <style name="KeyButton" parent="android:Widget.Material.Button">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_margin">4dp</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:minHeight">0dp</item>
+        <item name="android:textSize">26sp</item>
+        <item name="android:textColor">#172033</item>
+        <item name="android:backgroundTint">#FFFFFF</item>
+    </style>
+
+    <style name="OpKey" parent="KeyButton">
+        <item name="android:textColor">#356AE6</item>
+        <item name="android:backgroundTint">#E3EAFB</item>
+    </style>
+
+    <style name="EqualsKey" parent="KeyButton">
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:backgroundTint">#356AE6</item>
+    </style>
+</resources>
